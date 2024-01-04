@@ -1,5 +1,0 @@
-version 1.7
-- bug fixes
-- program optimization
-- output values optimization
-- added program termination feature
