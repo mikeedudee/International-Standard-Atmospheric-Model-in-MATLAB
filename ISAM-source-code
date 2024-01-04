@@ -1,0 +1,313 @@
+%% Copyright © 2023 by Francis Mike John Camogao
+% Email: francismikejohn.camogao@maharlika.cc | Phone: +639925648959
+% Re-creation of the 1976 International Standard Atmospheric Model in MATLAB
+% 12, October 2023 (created date)
+
+% This program research was originally a subject activity of my major, 
+% but I decided to publish it since I have seen no one make or release this 
+% type of program that is imperative to the aerospace and aeronautical disciplines.
+
+% *                                                                            *
+% *  Copyright © 2023 by Francis Mike John Camogao                             *
+% *  Permission is hereby granted, free of charge, to any person obtaining     
+% *  a copy of this software and associated documentation files 
+% *  (the "Software"), to deal in the Software without restriction, 
+% *  including without limitation the rights to use, copy, modify, merge, 
+% *  publish, distribute, copies of the Software, and to permit persons to 
+% *  whom the Software is furnished to do so, subject to the                                                                     *
+% *  following conditions:       
+% *  
+% *  This program is open-source and common-distributable, designed for        *
+% *  educational purposes, particularly in the fields of aerospace and         *
+% *  aeronautical applications. Users are free to utilize, modify, and         *
+% *  distribute the source code as per their educational requirements.         *
+% *                                                                            *
+% *  However, when referencing or utilizing this code as a resource, it is     *
+% *  kindly requested to acknowledge the author, Francis Mike John Camogao,    *
+% *  and cite the appropriate credit. Additionally, any improvements, bug      *
+% *  fixes, or enhancements made to the original code are encouraged to be     *
+% *  shared with the community through the associated GitHub repository.       *
+% *                                                                            *
+% *  This program is provided as-is, without any warranties or guarantees,     *
+% *  and the author holds no liability for its use.                            *
+% *                                              
+% *  The above copyright notice and this permission notice shall be 
+% *  included in all copies or substantial portions of the Software.
+
+% Github link: 
+
+%% Initialization
+   clc
+   close all
+   clear all
+   format bank %general formatting
+   ClippingStyle = 'rectangle';
+                                    
+%% Constants of Metric System
+       T1 = 288.15; %Kelvin       | Base Temperature at sea level
+       g  = 9.81;   %m/s^2        | Acceleration of gravity
+       R  = 287;    %J/(kg*K)     | Gas constant
+       P1 = 101325; %Pa or %N/m^2 | Base Pressure at sea level
+
+         % Lapse rate per layer
+           a0_11_20 = -0.0065; %K/m | 0km to 20km
+           a20_32   = 0.001;   %K/m | 20km to 32km
+           a32_47   = 0.0028;  %K/m | 32km to 47km
+           a47_51   = 0.0028;  %K/m | 47km to 51km
+           a51_71   = -0.0028; %K/m | 51km to 71km
+           a71_84   = -0.002;  %K/m | 71km to 84km
+           a84_105  = 0.004;   %K/m | 84km to 105km
+           
+%% Layers
+          % First Layer
+              Altitude_1                 = [0:10:11000];
+                  Temperature_Altitude_1 = T1 + (a0_11_20 * Altitude_1);
+                  Pressure_Altitude_1    = P1 * (Temperature_Altitude_1/T1).^(-g/(a0_11_20 * R));
+                  rho_Altitude_1         = Pressure_Altitude_1./(R * Temperature_Altitude_1);
+                  
+          % Second Layer
+              Altitude_2                 = (11000:10:20000);
+                  Temperature_Altitude_2 = 216.65 * ones((size(Altitude_2))); %creating a temperature the size of the entire altitude
+                  Pressure_Altitude_2    = Pressure_Altitude_1(end) * exp((-g/(R*216.65))*(Altitude_2-11000));
+                  rho_Altitude_2         = Pressure_Altitude_2./(R * Temperature_Altitude_1(end));
+
+          % Third Layer
+              Altitude_3                 = (20000:10:32000);
+                  Temperature_Altitude_3 = 216.65 + (a20_32 * (Altitude_3 - 20000));                                  
+                  Pressure_Altitude_3    = Pressure_Altitude_2(end) * (Temperature_Altitude_3/Temperature_Altitude_2(end)).^(-g/(a20_32 * R));
+                  rho_Altitude_3         = Pressure_Altitude_3./(R * Temperature_Altitude_3);                                
+
+         % Fourth Layer
+              Altitude_4                 = (32000:10:47000);
+                  Temperature_Altitude_4 = Temperature_Altitude_3(end) + (a32_47 * (Altitude_4 - 32000));
+                  Pressure_Altitude_4    = Pressure_Altitude_3(end) * (Temperature_Altitude_4/Temperature_Altitude_3(end)).^(-g/(a32_47 * R));
+                  rho_Altitude_4         = Pressure_Altitude_4./(R * Temperature_Altitude_4);
+                  
+          % Fifth Layer
+              Altitude_5                 = (47000:10:51000);
+                  Temperature_Altitude_5 = Temperature_Altitude_4(end) * ones((size(Altitude_5))); %creating a temperature the size of the entire altitude
+                  Pressure_Altitude_5    = Pressure_Altitude_4(end) * exp((-g/(R * Temperature_Altitude_4(end))) * (Altitude_5 - 47000));
+                  rho_Altitude_5         = Pressure_Altitude_5./(R * Temperature_Altitude_4(end));
+                  
+          % Sixth Layer
+              Altitude_6                 = (51000:10:71000);
+                  Temperature_Altitude_6 = Temperature_Altitude_5(end) + (a51_71 * (Altitude_6 - 51000));
+                  Pressure_Altitude_6    = Pressure_Altitude_5(end) * (Temperature_Altitude_6/Temperature_Altitude_5(end)).^(-g/(a51_71 * R));
+                  rho_Altitude_6         = Pressure_Altitude_6./(R * Temperature_Altitude_6);
+
+          % Seventh Layer
+              Altitude_7                 = (71000:10:84850);
+                  Temperature_Altitude_7 = Temperature_Altitude_6(end) + (a71_84 * (Altitude_7 - 71000));
+                  Pressure_Altitude_7    = Pressure_Altitude_6(end) * (Temperature_Altitude_7/Temperature_Altitude_6(end)).^(-g/(a71_84 * R));
+                  rho_Altitude_7         = Pressure_Altitude_7./(R * Temperature_Altitude_7);
+
+          % Eight Layer
+              Altitude_8                 = (84850:10:90000);
+                  Temperature_Altitude_8 = Temperature_Altitude_7(end) + (a84_105 * ( Altitude_8 - 84850));
+                  Pressure_Altitude_8    = Pressure_Altitude_7(end) * (Temperature_Altitude_8/Temperature_Altitude_7(end)).^(-g/(a84_105 * R));
+                  rho_Altitude_8         = Pressure_Altitude_8./(R*Temperature_Altitude_8);
+                  
+          % Ninth Layer
+              Altitude_9                 = (90000:10:105000);
+                  Temperature_Altitude_9 = Temperature_Altitude_8(end) + (a84_105 * ( Altitude_9 - 90000));
+                  Pressure_Altitude_9    = Pressure_Altitude_8(516) * (Temperature_Altitude_9/Temperature_Altitude_8(end)).^(-g/(a84_105 * R));
+                  rho_Altitude_9         = Pressure_Altitude_9./(R*Temperature_Altitude_9);
+
+%% Plotting all the values
+    % Coordinate stating where the figure should be located on the screen
+    % of the user (dependent on your monitor screen size)
+      x      = 150; % x-coordinate of the figure's bottom-left corner
+      y      = 0;   % y-coordinate of the figure's bottom-left corner
+      
+      width  = 1080; % width in pixels
+      height = 720;  % height in pixels
+
+    % Creating a figure with custom dimensions using the above statements
+      fig = figure('Position', [x, y, width, height], 'Toolbar', 'none', 'NumberTitle', 'off', 'Name', 'International Standard Atmospheric Model');    
+        
+        % Custom Menu
+          karman = uimenu('Text', 'What is Kármán Line?');
+          set(0, 'showhiddenhandles', 'off')
+          fHandles = findall(fig);
+          set(fHandles(2), 'foregroundColor', [1 0 0])
+          uimenu(karman, 'Text', 'SUMMARY: The Kármán line, situated about 100 kilometers (62 miles) above Earths surface, represents the boundary between Earths atmosphere and outer space.');
+          uimenu(karman, 'Label', '● Kármán Line Full Description', 'Callback', @menuItemClick);
+          
+          author   = uimenu('Text', 'Author & License');
+          fHandles = findall(fig);
+          set(fHandles(2), 'foregroundColor', [1 0 0])
+          uimenu(author, 'Label', '● Program License', 'Callback', @menuItemLicense); 
+          uimenu(author, 'Label', '● Author', 'Callback', @menuItemAuthor);
+          
+        %% Net Arrays
+            Altitude    = [Altitude_1, Altitude_2, Altitude_3, Altitude_4, Altitude_5, Altitude_6, Altitude_7, Altitude_8, Altitude_9];
+            Temperature = [Temperature_Altitude_1, Temperature_Altitude_2, Temperature_Altitude_3, Temperature_Altitude_4, Temperature_Altitude_5, Temperature_Altitude_6, Temperature_Altitude_7, Temperature_Altitude_8, Temperature_Altitude_9];
+            Pressure    = [Pressure_Altitude_1, Pressure_Altitude_2, Pressure_Altitude_3, Pressure_Altitude_4, Pressure_Altitude_5, Pressure_Altitude_6, Pressure_Altitude_7, Pressure_Altitude_8, Pressure_Altitude_9]/1000;
+            rho         = [rho_Altitude_1, rho_Altitude_2, rho_Altitude_3, rho_Altitude_4, rho_Altitude_5, rho_Altitude_6, rho_Altitude_7, rho_Altitude_8, rho_Altitude_9];
+ 
+        %% Plotting
+                % Plot the results on a single graph
+                  t   = tiledlayout(1, 1);
+                  ax1 = axes(t);          
+                  plot(ax1, Temperature, Altitude,'-.r', 'LineWidth', 2); 
+                  hold on;
+                  plot(ax1, Pressure, Altitude, 'b--', 'LineWidth', 2);                    
+                      
+                    % First X-axis #Temperatures
+                      ax1.XAxisLocation = 'bottom';
+                      ax1.YAxisLocation = 'left';
+                      ax1.YAxis.Visible = 'on';
+                      ax1.XColor        = 'r';
+                      ax1.YColor        = 'k';
+                      ax1.Box           = 'off';
+                      xlabel('Temperature (K)');
+                      ylabel('Geometric Altitude (km)');
+                      legend('Temperature', 'Pressure', 'Location','northwest', 'fontsize', 12);
+                      enableDefaultInteractivity(ax1);
+                      
+                    % Second X-axis #Pressures 
+                      ax2               = axes(t);
+                      plot(ax2, 0);
+                      ax2.XAxisLocation = 'top';
+                      ax2.YAxisLocation = 'right';
+                      ax2.YAxis.Visible = 'off';
+                      ax2.Color         = 'none';
+                      ax2.Box           = 'off';
+                      ax2.XColor        = 'b';
+                      xlabel('Pressure (kPa)');
+                      enableDefaultInteractivity(ax2)
+                      
+                % Limit the axis as-together such that they'll be inline
+                % with each others values. In candor, I must state that I
+                % am not sure that the line of code below does really anything.
+                  ax2.XLim = ax1.XLim;
+                  linkprop([ax1 ax2], 'XLim');
+                  hold off;
+            
+                   %% Labels
+                      hold on;    
+                               altitudes        = [11000, 20000, 32000, 47000, 51000, 71000, 84850, 90000, 105000];
+                               temperature_data = {Temperature_Altitude_1(1101), Temperature_Altitude_2(901), Temperature_Altitude_3(1201), Temperature_Altitude_4(1501), Temperature_Altitude_5(401), Temperature_Altitude_6(2001), Temperature_Altitude_7(1386), Temperature_Altitude_8(516), Temperature_Altitude_9(1501)};
+
+                                    % Display a circular shape on a specific point in line
+                                      for i = 1:numel(altitudes)
+                                          plot(temperature_data{i}, altitudes(i), 'Marker', 'o', 'MarkerSize', 5, 'MarkerEdgeColor', 'red', 'MarkerFaceColor', 'green');
+                                      end
+
+                             % Display text that indicates the altitude per layer increments
+                               alignment = {'right', 'right', 'right', 'left', 'left', 'right', 'right', 'left', 'left'};
+                               labels    = {'11km  ', '20km  ', '32km  ', '  47km', '  51km', '71km  ', '84.85km  ', '  90km', '  105km'};
+
+                                   for i = 1:numel(altitudes)
+                                       h = text(temperature_data{i}, altitudes(i), labels{i}, 'HorizontalAlignment', alignment{i});
+                                       set (h(:), 'Clipping', 'on');
+                                   end
+  
+                             % Pressure text
+                               i = text(50, 10000, sprintf('Pressure'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', 'blue', 'fontweight', 'bold');
+                               set (i(:), 'Clipping', 'on');
+                                  
+                             % Temperature text
+                               j = text(Temperature_Altitude_9(1501), 106000, sprintf('Temperature'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', 'red', 'fontweight', 'bold');
+                               set (j(:), 'Clipping', 'on');
+                                 
+                             % Karman Line text   
+                               k = text(150, 100000, sprintf('Kármán Line (100km)'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', '0 0 0.3', 'FontSize', 12, 'fontweight', 'normal');
+                                
+                             % Horizontal Karman Line
+                               line_length = 150.0;
+                               line([150 - line_length, 150 + line_length], [100000, 100000], 'Color', '0 0 0.3', 'LineStyle', '--');
+                               line([150 - line_length, 150 + line_length], [100000, 100000], 'Color', '0 0 0.3', 'LineStyle', '--');
+                               set (k(:), 'Clipping', 'on');
+                               
+                             % Horizontal Sea Level Line
+                               line_length = 150.0;
+                               line([150 - line_length, 150 + line_length], [0, 0], 'Color', '0 0 0.3', 'LineStyle', '--');
+                               line([150 - line_length, 150 + line_length], [0, 0], 'Color', '0 0 0.3', 'LineStyle', '--');
+                               set (k(:), 'Clipping', 'on');
+                                  
+                             % Sea Level text
+                               l = text(150, 0, sprintf('Sea Level (0km)'), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', '0 0 0.3', 'FontSize', 12, 'fontweight', 'normal');
+                               set (l(:), 'Clipping', 'on');
+                      hold off;
+                      
+     %% Title of the figure and color bar
+        title('\fontname{Times New Roman}1976 International Standard Atmospheric Model', 'fontsize', 13);
+        grid on;
+                             % Get the current axes handle
+                               ax = gca;
+
+                             % Set the grid line color to black
+                               ax.GridColor = 'black';
+                                       
+                                  % Color Bar
+                                    for Color_Bar = 1;
+                                        y_values  = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+                                        colors    = [0, 5, 12, 30, 50, 65, 80, 90, 100];
+
+                                        % Custom colormap
+                                          map = [0 0 0; 0 0 0.3; 0 0 0.6; 0 0 0.8; 0 0.6 0.8; 0 0.8 0.8];
+                                          colormap(flipud(map));
+
+                                        % Create a colorbar
+                                          caxis([0, 120]);
+                                          h = colorbar;
+
+                                        % Normalizing the colors based on y-values
+                                          normalized_colors = interp1(y_values, colors, h.Ticks);
+                                          tick_positions    = colors * (size(map, 1) - 1) + 1;
+
+                                        % Colorbar tick positions and labels
+                                          h.Ticks               = colors;
+                                          h.TickLabels          = {'Sea Level', 'T R O P O S P H E R E' ,'12km', 'S T R A T O S P H E R E', '50km', 'M E S O S P H E R E','80km', 'T H E R M O S P H E R E','100km'};
+                                          h.Ticks(end + 1)      = 110;
+                                          h.TickLabels{end + 1} = '-- O U T E R  S P A C E --';
+                                          h.Ticks(end + 1)      = 120;
+                                          h.TickLabels{end + 1} = 'E X O S P H E R E';
+
+                                          % Customizing the font properties for the colorbar tick labels
+                                            fontProperties      = struct('FontName', 'Arial', 'FontSize', 10, 'FontWeight', 'normal', 'FontAngle', 'italic');
+                                            set(h, fontProperties);     
+                                    end 
+
+%% Matrix Table
+    format short g
+    Layer_number        = [1:1:10];
+    Altitude_Base       = [0, 11000, 20000, 32000, 47000, 51000, 71000, 84850, 90000, 105000];
+    Lapse_Rate          = [a0_11_20, a0_11_20, a20_32, a32_47, a47_51, a51_71, a71_84, a84_105, a84_105, a84_105];
+    Base_Temperature    = [Temperature_Altitude_1(1), Temperature_Altitude_1(end), Temperature_Altitude_2(end), Temperature_Altitude_3(end), Temperature_Altitude_4(end), Temperature_Altitude_5(end), Temperature_Altitude_6(end), Temperature_Altitude_7(end), Temperature_Altitude_8(end), Temperature_Altitude_9(end)];
+    Base_Pressure       = [Pressure_Altitude_1(1), Pressure_Altitude_1(end), Pressure_Altitude_2(end), Pressure_Altitude_3(end), Pressure_Altitude_4(end), Pressure_Altitude_5(end), Pressure_Altitude_6(end), Pressure_Altitude_7(end), Pressure_Altitude_8(end), Pressure_Altitude_9(end)];
+    Table               = [Layer_number; Altitude_Base; Lapse_Rate; Base_Temperature; Base_Pressure]';
+
+     % Display the results
+       fprintf('\n<strong>          Layer     Altitude     Lapse        Base         Base</strong>\n')
+       fprintf('<strong>                    Base (m)   Rate(K/m) Temperature(K) Pressure (Pa)</strong>\n')
+       disp(Table)
+       Termination
+       
+%% Callback functions
+function menuItemClick(source, event)
+         msgbox("The Kármán line, also known as the Kármán–Sommerfeld line, is an imaginary boundary in Earth's atmosphere that defines the edge of space. It is named after the Hungarian-American aerospace engineer and physicist Theodore von Kármán. The Kármán line is located at an altitude of approximately 100 kilometers (62 miles) above sea level. At this altitude, the Earth's atmosphere becomes extremely thin, and the distinction between the Earth's atmosphere and outer space becomes more apparent. Below the Kármán line, the atmosphere is thick enough to support aerodynamic flight and sustain human life with a breathable atmosphere. Beyond this boundary, the atmosphere is so thin that it cannot support traditional flight, and spacecraft must rely on rocket propulsion to remain in orbit or travel through space. The Kármán line is often used as a common definition for the boundary between Earth's atmosphere and outer space, although it's important to note that there isn't a sharp, physical boundary at this exact altitude. The choice of 100 kilometers as the Kármán line is somewhat arbitrary but is widely accepted and used in space-related discussions and treaties.", "What is Kármán Line?", "help");
+end
+
+function menuItemLicense(source, event)
+         msgbox("The source code and license applied to this program are open-source and common-distributable and can be used in any application for educational purposes, mainly for aerospace and aeronautical applications. However, when used as a reference, please cite the author's name. Moreover, if you found any bugs or made improvements to the original code or UI, please do not hesitate to update or share the files in the Github repository. It is much appreciated. Copyright © 2023 by Francis Mike John Camogao.        Version 1.7", "Program License", "help");
+end
+
+function menuItemAuthor(source, event)
+         msgbox("Created by Francis Mike John Camogao, an aerospace engineering student and researcher at Indiana Aerospace University from the Philippines.               Email: francismikejohn.camogao@maharlika.cc | Phone: +639925648959", "Author", "help");
+end
+
+%% Termination Prompt
+function Termination
+       userInput = input('Type "X/x" to terminate program~$ ', 'S');
+       switch userInput
+           case{'X', 'x'}
+               clc
+               close all
+               clear all
+               return;
+           otherwise
+               Termination
+       end
+end
