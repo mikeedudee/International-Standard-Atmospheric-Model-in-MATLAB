@@ -1,0 +1,11 @@
+version 1.8
+- program optimization
+- ui optimization
+- added program restart feature
+- bug fixes
+
+version 1.7
+- bug fixes
+- program optimization
+- output values optimization
+- added program termination feature
